@@ -108,6 +108,10 @@ class Calculator {
             return Result(Errors.INVALID_EXPRESSION)
         }
 
+        return Result(calculatePostfix(postfixNotation))
+    }
+
+    private fun calculatePostfix(postfixNotation: List<String>): String {
         val stack = ArrayDeque<String>()
         for (operand in postfixNotation) {
             if (!OPERATORS_WITH_PRIORITIES.containsKey(operand)) {
@@ -119,8 +123,7 @@ class Calculator {
                 stack.addFirst(calculate(left, right, operand).toString())
             }
         }
-
-        return Result(stack.single())
+        return stack.single()
     }
 
     private fun calculate(left: Int, right: Int, operator: String): Int {
