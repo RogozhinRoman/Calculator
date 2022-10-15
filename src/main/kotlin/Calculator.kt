@@ -24,15 +24,8 @@ fun main() {
 class Calculator {
     companion object {
         private val SUPPORTED_VARIABLE_NAME_PATTERN = "[a-zA-Z]*".toRegex()
-        private val SUPPORTED_OPERATIONS = "(-|[+]|=|[(]|[)]|[*]|/|\\^).".toRegex()
-
-        private val OPERATORS_WITH_PRIORITIES = mapOf(
-            "+" to 1,
-            "-" to 1,
-            "*" to 2,
-            "/" to 2,
-            "^" to 2
-        )
+        private val SUPPORTED_SPEC_SYMBOLS = "(-|[+]|=|[(]|[)]|[*]|/|\\^).".toRegex()
+        private val SUPPORTED_OPERATIONS = listOf("+", "-", "*", "/", "^")
     }
 
     private val variables: MutableMap<String, String> = mutableMapOf()
@@ -55,7 +48,7 @@ class Calculator {
     }
 
     fun tryCalculate(input: String): Result<String> = when {
-        !input.contains(SUPPORTED_OPERATIONS) -> handleVariableOperation(input)
+        !input.contains(SUPPORTED_SPEC_SYMBOLS) -> handleVariableOperation(input)
         input.contains('=') -> handleAssignment(input)
         else -> calculate(input)
     }
@@ -114,7 +107,7 @@ class Calculator {
     private fun calculatePostfix(postfixNotation: List<String>): String {
         val stack = ArrayDeque<String>()
         for (operand in postfixNotation) {
-            if (!OPERATORS_WITH_PRIORITIES.containsKey(operand)) {
+            if (!SUPPORTED_OPERATIONS.contains(operand)) {
                 stack.addFirst(operand)
             } else {
                 val right = stack.removeFirst().getValue()
