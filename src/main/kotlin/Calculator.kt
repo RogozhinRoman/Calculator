@@ -24,8 +24,7 @@ fun main() {
 class Calculator {
     companion object {
         private val SUPPORTED_VARIABLE_NAME_PATTERN = "[a-zA-Z]*".toRegex()
-        private val CALCULATION_PATTERN = "(-|[+])?\\w+(\\s*(-|[+])*\\s*\\w+)*".toRegex()
-        private val SUPPORTED_OPERATIONS = "(-|[+]|=|(|)|[*]|/|^).".toRegex()
+        private val SUPPORTED_OPERATIONS = "(-|[+]|=|[(]|[)]|[*]|/|\\^).".toRegex()
 
         private val OPERATORS_WITH_PRIORITIES = mapOf(
             "+" to 1,
@@ -114,8 +113,8 @@ class Calculator {
             if (!OPERATORS_WITH_PRIORITIES.containsKey(operand)) {
                 stack.addFirst(operand)
             } else {
-                val left = stack.removeFirst().getValue()
                 val right = stack.removeFirst().getValue()
+                val left = stack.removeFirst().getValue()
 
                 stack.addFirst(calculate(left, right, operand).toString())
             }
@@ -134,17 +133,7 @@ class Calculator {
             else -> throw Exception("Unsupported operator")
         }
     }
-    private fun add(x: Int, y: Int): Int = x + y
-    private fun subtract(x: Int, y: Int): Int = x - y
     private fun String.getValue() = toIntOrNull() ?: getVariableValueOrError(this).value!!.toInt()
-
-    private fun String.parseOperator(): (Int, Int) -> Int {
-        return when (replace("--|\\+".toRegex(), "")) {
-            "-" -> ::subtract
-            "" -> ::add
-            else -> throw Exception("Unknown operator")
-        }
-    }
 }
 
 data class Result<T> private constructor(val error: Errors?, val value: T?) {
@@ -199,7 +188,7 @@ class NotationConverter {
                 }
 
                 if (operand.first().isLetter() || operand.first().isDigit()) {
-                    stack.addFirst(operand)
+                    result.add(operand)
                 } else if (stack.isEmpty() || stack.first() == "(") {
                     stack.addFirst(operand)
                 } else if (OPERATORS_WITH_PRIORITIES.containsKey(operand)) {
@@ -247,7 +236,7 @@ class NotationConverter {
                 endIndex++
             }
 
-            return input.substring(startIndex, endIndex)
+            return if (startIndex == endIndex) input[startIndex].toString() else input.substring(startIndex, endIndex)
         }
     }
 }
