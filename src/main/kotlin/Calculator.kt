@@ -1,4 +1,4 @@
-import kotlin.math.pow
+import java.math.BigInteger
 
 fun main() {
     val calculator = Calculator()
@@ -55,12 +55,12 @@ class Calculator {
 
     private fun handleAssignment(input: String): Result<String> {
         val parts = input.split("\\s*=\\s*".toRegex())
-        fun isAlreadyExistedVariable(term: String) = term.toIntOrNull() == null && !variables.containsKey(term)
+        fun isNotExistedVariable(term: String) = term.toBigIntegerOrNull() == null && !variables.containsKey(term)
 
         return when {
             parts.size != 2 -> Result(Errors.INVALID_ASSIGNMENT)
             !SUPPORTED_VARIABLE_NAME_PATTERN.matches(parts.first()) -> Result(Errors.INVALID_IDENTIFIER)
-            isAlreadyExistedVariable(parts.last()) -> Result(Errors.INVALID_ASSIGNMENT)
+            isNotExistedVariable(parts.last()) -> Result(Errors.INVALID_ASSIGNMENT)
             else -> {
                 variables[parts.first()] = parts.last()
                 return Result()
@@ -84,7 +84,7 @@ class Calculator {
         while (true) {
             return if (!variables.containsKey(currentVariableName)) {
                 Result(Errors.UNKNOWN_VARIABLE)
-            } else if (variables[currentVariableName]!!.toIntOrNull() == null) {
+            } else if (variables[currentVariableName]!!.toBigIntegerOrNull() == null) {
                 currentVariableName = variables[currentVariableName]!!
                 continue
             } else {
@@ -119,17 +119,18 @@ class Calculator {
         return stack.single()
     }
 
-    private fun calculate(left: Int, right: Int, operator: String): Int {
+    private fun calculate(left: BigInteger, right: BigInteger, operator: String): BigInteger {
         return when (operator) {
             "+" -> left + right
             "-" -> left - right
             "/" -> left / right
             "*" -> left * right
-            "^" -> left.toDouble().pow(right).toInt()
+            "^" -> left.pow(right.toInt())
             else -> throw Exception("Unsupported operator")
         }
     }
-    private fun String.getValue() = toIntOrNull() ?: getVariableValueOrError(this).value!!.toInt()
+
+    private fun String.getValue() = toBigIntegerOrNull() ?: BigInteger(getVariableValueOrError(this).value!!)
 }
 
 data class Result<T> private constructor(val error: Errors?, val value: T?) {
@@ -174,9 +175,9 @@ class NotationConverter {
                 if (OPERATORS_WITH_PRIORITIES.containsKey(operand.first().toString())) {
                     operand = if (operand.length > 1 && !arrayOf('+', '-').contains(operand.first())) {
                         throw Exception("Invalid expression")
-                    } else if (operand.first() == '+'){
+                    } else if (operand.first() == '+') {
                         "+"
-                    } else if (operand.first() == '-'){
+                    } else if (operand.first() == '-') {
                         if (operand.length % 2 == 0) "+" else "-"
                     } else {
                         operand
@@ -228,7 +229,8 @@ class NotationConverter {
             var endIndex = startIndex
             while (endIndex < input.length
                 && !notationDelimiters.contains(input[endIndex])
-                && !parenthesis.contains(input[endIndex])) {
+                && !parenthesis.contains(input[endIndex])
+            ) {
                 endIndex++
             }
 
