@@ -37,7 +37,9 @@ class Calculator {
                 true
             }
             "/help" -> {
-                println("The program calculates the sum of numbers")
+                println("The smart calculator with the opportunity to operate with huuuuuge numbers." +
+                        "+, -, /, :, ^ operations are supported." +
+                        "Also, this calculator is able to create and store variables")
                 false
             }
             else -> {
